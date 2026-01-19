@@ -1,0 +1,107 @@
+backend/app/main.py
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from api.agent_routes import router
+
+app = FastAPI(title="Autonomous AI Agent")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"]
+)
+
+app.include_router(router, prefix="/api/agent")
+
+@app.get("/")
+def health():
+    return {"status": "Agent running"}
+
+
+backend/app/api/interview.py
+from fastapi import APIRouter
+from pydantic import BaseModel
+from interview_engine.question_generator import generate_question
+from interview_engine.answer_evaluator import evaluate_answer
+
+router = APIRouter()
+
+class InterviewRequest(BaseModel):
+    role: str
+    level: str
+
+class AnswerRequest(BaseModel):
+    question: str
+    answer: str
+
+@router.post("/start")
+def start_interview(data: InterviewRequest):
+    question = generate_question(data.role, data.level)
+    return {"question": question}
+
+@router.post("/evaluate")
+def evaluate(data: AnswerRequest):
+    result = evaluate_answer(data.question, data.answer)
+    return result
+
+
+backend/app/interview_engine/question_generator.py
+from llm.client import ask_llm
+
+def generate_question(role: str, level: str) -> str:
+    prompt = f"""
+    You are a professional interviewer.
+    Ask one {level} level interview question for the role of {role}.
+    Only return the question.
+    """
+    return ask_llm(prompt)
+
+
+backend/app/interview_engine/answer_evaluator.py
+from llm.client import ask_llm
+
+def evaluate_answer(question: str, answer: str):
+    prompt = f"""
+    You are an interviewer.
+
+    Question: {question}
+    Answer: {answer}
+
+    Evaluate the answer based on:
+    - Correctness
+    - Clarity
+    - Depth
+
+    Return response in JSON:
+    {{
+      "score": "0-10",
+      "strengths": ["point1", "point2"],
+      "improvements": ["point1", "point2"]
+    }}
+    """
+    response = ask_llm(prompt)
+    return response
+
+
+backend/app/llm/client.py
+import os
+from openai import OpenAI
+
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
+def ask_llm(prompt: str) -> str:
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[{"role": "user", "content": prompt}],
+        temperature=0.7
+    )
+    return response.choices[0].message.content
+
+
+backend/requirements.txt
+fastapi
+uvicorn
+openai
+pydantic
+python-dotenv
