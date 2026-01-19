@@ -1,0 +1,43 @@
+autonomous-ai-agent/
+│
+├── agent/
+│   ├── planner.py          # Breaks user goal into steps
+│   ├── executor.py         # Executes steps using tools
+│   ├── selector.py         # Chooses the best tool
+│   ├── observer.py         # Evaluates results & next action
+│   └── state.py            # Agent loop & state management
+│
+├── tools/
+│   ├── web_search.py       # Web search tool
+│   ├── calculator.py      # Math & logic tool
+│   ├── file_reader.py     # Read text / PDF files
+│   ├── code_executor.py   # Execute code safely
+│   └── tool_registry.py   # Tool schemas & metadata
+│
+├── memory/
+│   ├── short_term.py      # Session memory
+│   ├── long_term.py       # Persistent memory
+│   └── vector_store.py    # Embedding-based memory
+│
+├── llm/
+│   ├── client.py          # LLM wrapper (OpenAI / OSS)
+│   └── prompts.py         # Planning & reflection prompts
+│
+├── api/
+│   ├── main.py            # FastAPI entry point
+│   └── agent_routes.py    # API endpoints
+│
+├── prompts/
+│   ├── planner.txt
+│   ├── tool_selector.txt
+│   └── reflection.txt
+│
+├── docs/
+│   ├── architecture.png
+│   ├── agent-loop.png
+│   └── examples.md
+│
+├── roadmap.md
+├── README.md
+├── requirements.txt
+└── LICENSE
